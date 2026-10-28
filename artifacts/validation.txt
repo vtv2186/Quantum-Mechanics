@@ -1,0 +1,13 @@
+test_born_sampling_and_clocks (test_numerics.PhysicsTests.test_born_sampling_and_clocks) ... ok
+test_fringe_spacing_and_closed_slit (test_numerics.PhysicsTests.test_fringe_spacing_and_closed_slit) ... ok
+test_invalid_parameters (test_numerics.PhysicsTests.test_invalid_parameters) ... ok
+test_probability_budget (test_numerics.PhysicsTests.test_probability_budget) ... ok
+test_spatial_refinement (test_numerics.PhysicsTests.test_spatial_refinement) ... ok
+test_timestep_refinement (test_numerics.PhysicsTests.test_timestep_refinement) ... ok
+test_unitary_without_absorber (test_numerics.PhysicsTests.test_unitary_without_absorber) ... ok
+
+----------------------------------------------------------------------
+Ran 7 tests in 130.287s
+
+OK
+Fringe spacing internal units: 7.375 de Broglie: 7.493437670000549
