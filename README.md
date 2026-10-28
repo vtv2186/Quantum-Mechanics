@@ -57,3 +57,7 @@ ffmpeg -y -i artifacts/evolution.gif -vf "scale=trunc(iw/2)*2:trunc(ih/2)*2" -c:
 ```
 
 Manim Voiceover has not yet been integrated.
+
+### Run the notebook in VS Code or Jupyter
+
+Open `notebooks/DoubleSlit.ipynb` with the VS Code Jupyter extension and select your Python virtual environment as its kernel. Install `ipykernel` in that environment if prompted. Run the notebook from the cloned repository. Edit the `parameters` dictionary for voltage, slit dimensions, detection rate and output location; Databricks widgets are used only when `dbutils` is available. Local notebook outputs default to `artifacts/notebook/`. The optional Manim cell remains disabled until its dependencies are installed.

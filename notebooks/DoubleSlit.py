@@ -1,29 +1,45 @@
 # Databricks notebook source
 # MAGIC %md
 # MAGIC # Electron double slit: TDSE and Born detections
-# MAGIC Run on a CPU cluster. Set `repo_path` to this checkout and `output_path` to a writable Unity Catalog Volume for durable artifacts. Manim requires native Cairo/Pango headers; see README for a cluster init script. No Spark execution is needed for the FFT solver.
+# MAGIC Run in VS Code/Jupyter or on a Databricks CPU cluster. Locally, edit the `parameters` dictionary below. On Databricks, use the widgets and optionally select a writable Unity Catalog Volume for outputs. Manim requires native Cairo/Pango headers; see README. No Spark execution is needed.
 
 # COMMAND ----------
-# MAGIC %pip install numpy>=2.0 scipy>=1.13 matplotlib>=3.8
+# MAGIC %pip install "numpy>=2.0,<3" "scipy>=1.13,<2" "matplotlib>=3.8,<4" pillow
 
 # COMMAND ----------
 import os, sys
 from pathlib import Path
-dbutils.widgets.text('repo_path', os.getcwd())
-dbutils.widgets.text('output_path', '/tmp/electron-slits')
-dbutils.widgets.text('voltage_V', '100')
-dbutils.widgets.text('separation_nm', '0.982')
-dbutils.widgets.text('width_nm', '0.246')
-dbutils.widgets.text('observed_rate_Hz', '100')
-repo = Path(dbutils.widgets.get('repo_path'))
+# VS Code/Jupyter: edit these values, then rerun this cell.
+# Discover the checkout whether the kernel starts in its root or notebooks folder.
+def find_repo():
+    for candidate in (Path.cwd(), *Path.cwd().parents):
+        if (candidate / 'electron_slits' / '__init__.py').is_file():
+            return candidate
+    raise FileNotFoundError('Open this notebook from the cloned Quantum-Mechanics folder, or set repo_path explicitly.')
+
+parameters = {
+    'repo_path': str(find_repo()),
+    'output_path': str(find_repo() / 'artifacts' / 'notebook'),
+    'voltage_V': '100',
+    'separation_nm': '0.982',
+    'width_nm': '0.246',
+    'observed_rate_Hz': '100',
+}
+if 'dbutils' in globals():
+    for name, default in parameters.items():
+        dbutils.widgets.text(name, default)
+    parameters = {name: dbutils.widgets.get(name) for name in parameters}
+repo = Path(parameters['repo_path']).expanduser().resolve()
+if not (repo / 'electron_slits' / '__init__.py').is_file():
+    raise FileNotFoundError(f'repo_path must contain electron_slits: {repo}')
 sys.path.insert(0, str(repo))
 from electron_slits import Config, run, save
-config = Config(voltage=float(dbutils.widgets.get('voltage_V')),
-                separation_nm=float(dbutils.widgets.get('separation_nm')),
-                width_nm=float(dbutils.widgets.get('width_nm')))
+config = Config(voltage=float(parameters['voltage_V']),
+                separation_nm=float(parameters['separation_nm']),
+                width_nm=float(parameters['width_nm']))
 result = run(config)
-out = Path(dbutils.widgets.get('output_path'))
-save(result, out, rate=float(dbutils.widgets.get('observed_rate_Hz')))
+out = Path(parameters['output_path']).expanduser().resolve()
+save(result, out, rate=float(parameters['observed_rate_Hz']))
 print('Screen crossing probability:', result['transmission'])
 print('Probability budget error:', abs(result['history'][:,3]-1).max())
 
@@ -59,7 +75,7 @@ ax.set(xlabel='Screen y (nm)',ylabel='Conditional probability per bin'); ax.lege
 # COMMAND ----------
 # MAGIC %md
 # MAGIC ## Optional MP4 render
-# MAGIC After native dependencies and `manim==0.19.2` are installed, run the next cell. Use a Volume for persistence. `displayHTML` embeds the video without a localhost server.
+# MAGIC After native dependencies and `manim==0.19.2` are installed, run the next cell. Use a Volume for persistence. The video is embedded without a localhost server.
 
 # COMMAND ----------
 import subprocess, base64
@@ -69,4 +85,4 @@ if render_video:
     env={**os.environ,'SLITS_ARTIFACTS':str(out),'MPLCONFIGDIR':'/tmp/matplotlib'}
     subprocess.run([sys.executable,'-m','manim','-ql',str(repo/'electron_slits/scene.py'),'ElectronExperiment','--media_dir',str(out/'media')],cwd=repo,env=env,check=True)
     video=next((out/'media').rglob('ElectronExperiment.mp4'))
-    displayHTML('<video controls src="data:video/mp4;base64,'+base64.b64encode(video.read_bytes()).decode()+'"></video>')
+    display(HTML('<video controls src="data:video/mp4;base64,'+base64.b64encode(video.read_bytes()).decode()+'"></video>'))

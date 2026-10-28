@@ -4,3 +4,5 @@ media/
 artifacts/**/*.npz
 
 .venv/
+
+artifacts/notebook/
