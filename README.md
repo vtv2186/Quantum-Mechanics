@@ -34,3 +34,26 @@ For optional rendering on a classic cluster, use an administrator-approved clust
 ## Validation in this environment
 
 Seven numerical tests passed, including spatial and timestep refinement. Central fringe spacing: 7.375 internal units versus the de Broglie prediction 7.4934 (1.6% difference). Maximum probability budget error: 1.31e-14. Spectral-current screen crossing probability: 0.1150. See `artifacts/validation.txt` and `artifacts/preview.png`. The numerical workflow ran here; Databricks cluster execution was not available for verification. MP4 rendering was attempted but unavailable because Manim needs missing Cairo/Pango development headers and this environment has no system installation privileges. The scene is supplied, but no rendered MP4 is claimed.
+
+## Open in VS Code
+
+Clone this repository, open its folder in VS Code, and install the Microsoft Python extension. Create a virtual environment with `python -m venv .venv`, activate it (`source .venv/bin/activate` on macOS/Linux or `.venv\Scripts\Activate.ps1` in Windows PowerShell), and select that environment using **Python: Select Interpreter**. Install dependencies as described above; Manim's native dependencies are only needed for Manim rendering.
+
+For the numerical simulation and Matplotlib previews alone:
+
+```bash
+python -m pip install numpy scipy matplotlib pillow
+python -m electron_slits
+python -c "from electron_slits import Config, run, save; save(run(Config(closed=True)), 'artifacts/single_slit')"
+python -m electron_slits.visualize
+```
+
+Run these commands from the repository root. The visualization command reads both runs and writes `artifacts/evolution.gif`, `artifacts/detections.gif`, and `artifacts/comparison.png`. The committed `artifacts/evolution.mp4` is a preview converted from the GIF with FFmpeg; it is not a Manim render. Open it in a browser or video player if VS Code does not preview it.
+
+To recreate that MP4 when FFmpeg is installed:
+
+```bash
+ffmpeg -y -i artifacts/evolution.gif -vf "scale=trunc(iw/2)*2:trunc(ih/2)*2" -c:v libx264 -pix_fmt yuv420p -movflags +faststart artifacts/evolution.mp4
+```
+
+Manim Voiceover has not yet been integrated.

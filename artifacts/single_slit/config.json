@@ -1,0 +1,11 @@
+{
+  "voltage": 100.0,
+  "separation_nm": 0.982,
+  "width_nm": 0.246,
+  "dx": 0.25,
+  "dt": 0.02,
+  "steps": 1500,
+  "closed": true,
+  "barrier": true,
+  "absorb": true
+}
